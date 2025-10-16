@@ -1,0 +1,243 @@
+###############################################################################
+# Django Multi-Tenant SaaS API - REST Client
+#
+# This file works with the REST Client extension for VS Code
+# Install: https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+#
+# Usage:
+# 1. Click "Send Request" above any request
+# 2. Start with Authentication requests to get tokens
+# 3. Tokens are automatically saved to variables for reuse
+# 4. Modify variables below to match your setup
+###############################################################################
+
+### Variables
+@baseUrl = http://localhost:8000
+@tenant1Domain = school1.localhost
+@tenant2Domain = school2.localhost
+@username = demo
+@password = demo123
+
+# These will be set automatically from auth responses
+@tenant1AccessToken =
+@tenant1RefreshToken =
+@tenant2AccessToken =
+@tenant2RefreshToken =
+
+
+###############################################################################
+# AUTHENTICATION - Tenant 1 (School 1)
+###############################################################################
+
+### Get Token for Tenant 1
+# @name loginTenant1
+POST http://{{tenant1Domain}}:8000/api/token/
+Content-Type: application/json
+
+{
+    "username": "{{username}}",
+    "password": "{{password}}"
+}
+
+### Capture tokens from response (automatic in VS Code REST Client)
+@tenant1AccessToken = {{loginTenant1.response.body.access}}
+@tenant1RefreshToken = {{loginTenant1.response.body.refresh}}
+
+
+### Refresh Token for Tenant 1
+# @name refreshTenant1
+POST http://{{tenant1Domain}}:8000/api/token/refresh/
+Content-Type: application/json
+
+{
+    "refresh": "{{tenant1RefreshToken}}"
+}
+
+
+###############################################################################
+# AUTHENTICATION - Tenant 2 (School 2)
+###############################################################################
+
+### Get Token for Tenant 2
+# @name loginTenant2
+POST http://{{tenant2Domain}}:8000/api/token/
+Content-Type: application/json
+
+{
+    "username": "{{username}}",
+    "password": "{{password}}"
+}
+
+### Capture tokens from response
+@tenant2AccessToken = {{loginTenant2.response.body.access}}
+@tenant2RefreshToken = {{loginTenant2.response.body.refresh}}
+
+
+### Refresh Token for Tenant 2
+# @name refreshTenant2
+POST http://{{tenant2Domain}}:8000/api/token/refresh/
+Content-Type: application/json
+
+{
+    "refresh": "{{tenant2RefreshToken}}"
+}
+
+
+###############################################################################
+# ITEMS API - Tenant 1 (School 1)
+###############################################################################
+
+### List all items for Tenant 1
+GET http://{{tenant1Domain}}:8000/api/items/
+Authorization: Bearer {{tenant1AccessToken}}
+
+
+### Create a new item for Tenant 1
+# @name createItemTenant1
+POST http://{{tenant1Domain}}:8000/api/items/
+Authorization: Bearer {{tenant1AccessToken}}
+Content-Type: application/json
+
+{
+    "name": "My First Item",
+    "description": "This is a test item created for Tenant 1"
+}
+
+
+### Get a specific item for Tenant 1 (replace {id} with actual ID)
+GET http://{{tenant1Domain}}:8000/api/items/1/
+Authorization: Bearer {{tenant1AccessToken}}
+
+
+### Update item (PUT - full replacement) for Tenant 1
+PUT http://{{tenant1Domain}}:8000/api/items/1/
+Authorization: Bearer {{tenant1AccessToken}}
+Content-Type: application/json
+
+{
+    "name": "Updated Item Name",
+    "description": "This item has been completely updated"
+}
+
+
+### Update item (PATCH - partial update) for Tenant 1
+PATCH http://{{tenant1Domain}}:8000/api/items/1/
+Authorization: Bearer {{tenant1AccessToken}}
+Content-Type: application/json
+
+{
+    "description": "Only updating the description, name stays the same"
+}
+
+
+### Delete item for Tenant 1
+DELETE http://{{tenant1Domain}}:8000/api/items/1/
+Authorization: Bearer {{tenant1AccessToken}}
+
+
+###############################################################################
+# ITEMS API - Tenant 2 (School 2)
+###############################################################################
+
+### List all items for Tenant 2
+GET http://{{tenant2Domain}}:8000/api/items/
+Authorization: Bearer {{tenant2AccessToken}}
+
+
+### Create a new item for Tenant 2
+# @name createItemTenant2
+POST http://{{tenant2Domain}}:8000/api/items/
+Authorization: Bearer {{tenant2AccessToken}}
+Content-Type: application/json
+
+{
+    "name": "School 2 Item",
+    "description": "This item belongs to Tenant 2 only"
+}
+
+
+### Get a specific item for Tenant 2
+GET http://{{tenant2Domain}}:8000/api/items/1/
+Authorization: Bearer {{tenant2AccessToken}}
+
+
+### Update item (PUT) for Tenant 2
+PUT http://{{tenant2Domain}}:8000/api/items/1/
+Authorization: Bearer {{tenant2AccessToken}}
+Content-Type: application/json
+
+{
+    "name": "Updated Tenant 2 Item",
+    "description": "Fully replaced item in Tenant 2"
+}
+
+
+### Update item (PATCH) for Tenant 2
+PATCH http://{{tenant2Domain}}:8000/api/items/1/
+Authorization: Bearer {{tenant2AccessToken}}
+Content-Type: application/json
+
+{
+    "name": "Partially updated name for Tenant 2"
+}
+
+
+### Delete item for Tenant 2
+DELETE http://{{tenant2Domain}}:8000/api/items/1/
+Authorization: Bearer {{tenant2AccessToken}}
+
+
+###############################################################################
+# USER PROFILE
+###############################################################################
+
+### Get current user profile for Tenant 1
+GET http://{{tenant1Domain}}:8000/api/profile/
+Authorization: Bearer {{tenant1AccessToken}}
+
+
+### Get current user profile for Tenant 2
+GET http://{{tenant2Domain}}:8000/api/profile/
+Authorization: Bearer {{tenant2AccessToken}}
+
+
+###############################################################################
+# TESTING TENANT ISOLATION
+###############################################################################
+
+### Try to use Tenant 1 token on Tenant 2 (should fail or show tenant mismatch)
+GET http://{{tenant2Domain}}:8000/api/items/
+Authorization: Bearer {{tenant1AccessToken}}
+
+
+### Try to use Tenant 2 token on Tenant 1 (should fail or show tenant mismatch)
+GET http://{{tenant1Domain}}:8000/api/items/
+Authorization: Bearer {{tenant2AccessToken}}
+
+
+###############################################################################
+# PAGINATION EXAMPLE
+###############################################################################
+
+### Get items with pagination (page 1)
+GET http://{{tenant1Domain}}:8000/api/items/?page=1
+Authorization: Bearer {{tenant1AccessToken}}
+
+
+### Get items with pagination (page 2)
+GET http://{{tenant1Domain}}:8000/api/items/?page=2
+Authorization: Bearer {{tenant1AccessToken}}
+
+
+###############################################################################
+# NOTES
+###############################################################################
+#
+# 1. Run authentication requests first to get tokens
+# 2. Tokens auto-expire after 15 minutes (configured in settings)
+# 3. Use refresh token endpoint to get new access token
+# 4. Each tenant has completely isolated data
+# 5. Tokens are tenant-specific and validated by middleware
+# 6. Default credentials: demo / demo123 (for both tenants)
+#
+###############################################################################

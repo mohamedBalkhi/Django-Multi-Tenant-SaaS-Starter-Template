@@ -1,0 +1,912 @@
+{
+	"info": {
+		"_postman_id": "multi-tenant-saas-api",
+		"name": "Django Multi-Tenant SaaS API",
+		"description": "Complete API collection for Django Multi-Tenancy template with tenant-aware JWT authentication",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "tenant1_domain",
+			"value": "school1.localhost",
+			"type": "string"
+		},
+		{
+			"key": "tenant2_domain",
+			"value": "school2.localhost",
+			"type": "string"
+		},
+		{
+			"key": "tenant1_access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "tenant1_refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "tenant2_access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "tenant2_refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "demo_username",
+			"value": "demo",
+			"type": "string"
+		},
+		{
+			"key": "demo_password",
+			"value": "demo123",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Tenant 1 - Get Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('tenant1_access_token', jsonData.access);",
+									"    pm.collectionVariables.set('tenant1_refresh_token', jsonData.refresh);",
+									"    pm.test('Token obtained successfully', function () {",
+									"        pm.expect(jsonData.access).to.be.a('string');",
+									"        pm.expect(jsonData.refresh).to.be.a('string');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{demo_username}}\",\n    \"password\": \"{{demo_password}}\"\n}"
+						},
+						"url": {
+							"raw": "http://{{tenant1_domain}}:8000/api/token/",
+							"protocol": "http",
+							"host": [
+								"{{tenant1_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"token",
+								""
+							]
+						},
+						"description": "Obtain JWT access and refresh tokens for Tenant 1 (School 1)"
+					},
+					"response": []
+				},
+				{
+					"name": "Tenant 2 - Get Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('tenant2_access_token', jsonData.access);",
+									"    pm.collectionVariables.set('tenant2_refresh_token', jsonData.refresh);",
+									"    pm.test('Token obtained successfully', function () {",
+									"        pm.expect(jsonData.access).to.be.a('string');",
+									"        pm.expect(jsonData.refresh).to.be.a('string');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{demo_username}}\",\n    \"password\": \"{{demo_password}}\"\n}"
+						},
+						"url": {
+							"raw": "http://{{tenant2_domain}}:8000/api/token/",
+							"protocol": "http",
+							"host": [
+								"{{tenant2_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"token",
+								""
+							]
+						},
+						"description": "Obtain JWT access and refresh tokens for Tenant 2 (School 2)"
+					},
+					"response": []
+				},
+				{
+					"name": "Tenant 1 - Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('tenant1_access_token', jsonData.access);",
+									"    if (jsonData.refresh) {",
+									"        pm.collectionVariables.set('tenant1_refresh_token', jsonData.refresh);",
+									"    }",
+									"    pm.test('Token refreshed successfully', function () {",
+									"        pm.expect(jsonData.access).to.be.a('string');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{tenant1_refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "http://{{tenant1_domain}}:8000/api/token/refresh/",
+							"protocol": "http",
+							"host": [
+								"{{tenant1_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"token",
+								"refresh",
+								""
+							]
+						},
+						"description": "Refresh the access token using the refresh token for Tenant 1"
+					},
+					"response": []
+				},
+				{
+					"name": "Tenant 2 - Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('tenant2_access_token', jsonData.access);",
+									"    if (jsonData.refresh) {",
+									"        pm.collectionVariables.set('tenant2_refresh_token', jsonData.refresh);",
+									"    }",
+									"    pm.test('Token refreshed successfully', function () {",
+									"        pm.expect(jsonData.access).to.be.a('string');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{tenant2_refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "http://{{tenant2_domain}}:8000/api/token/refresh/",
+							"protocol": "http",
+							"host": [
+								"{{tenant2_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"token",
+								"refresh",
+								""
+							]
+						},
+						"description": "Refresh the access token using the refresh token for Tenant 2"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for obtaining and refreshing JWT tokens"
+		},
+		{
+			"name": "Tenant 1 - Items API",
+			"item": [
+				{
+					"name": "List Items",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an object with results array', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('results');",
+									"    pm.expect(jsonData.results).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant1_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{tenant1_domain}}:8000/api/items/",
+							"protocol": "http",
+							"host": [
+								"{{tenant1_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"items",
+								""
+							]
+						},
+						"description": "Get all items for Tenant 1 (automatically tenant-isolated)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Item created successfully', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"    pm.expect(jsonData).to.have.property('description');",
+									"    pm.expect(jsonData).to.have.property('created_by');",
+									"    pm.expect(jsonData).to.have.property('created_at');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant1_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Item\",\n    \"description\": \"This is a test item for Tenant 1\"\n}"
+						},
+						"url": {
+							"raw": "http://{{tenant1_domain}}:8000/api/items/",
+							"protocol": "http",
+							"host": [
+								"{{tenant1_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"items",
+								""
+							]
+						},
+						"description": "Create a new item in Tenant 1's schema"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Item details returned', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant1_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{tenant1_domain}}:8000/api/items/1/",
+							"protocol": "http",
+							"host": [
+								"{{tenant1_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"items",
+								"1",
+								""
+							]
+						},
+						"description": "Get a specific item by ID from Tenant 1"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Item (PUT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Item updated successfully', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"    pm.expect(jsonData).to.have.property('description');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant1_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Item\",\n    \"description\": \"This item has been updated\"\n}"
+						},
+						"url": {
+							"raw": "http://{{tenant1_domain}}:8000/api/items/1/",
+							"protocol": "http",
+							"host": [
+								"{{tenant1_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"items",
+								"1",
+								""
+							]
+						},
+						"description": "Update an entire item (replace all fields)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Item (PATCH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Item partially updated', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant1_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Partially Updated Item\"\n}"
+						},
+						"url": {
+							"raw": "http://{{tenant1_domain}}:8000/api/items/1/",
+							"protocol": "http",
+							"host": [
+								"{{tenant1_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"items",
+								"1",
+								""
+							]
+						},
+						"description": "Partially update an item (update specific fields only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 204', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant1_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{tenant1_domain}}:8000/api/items/1/",
+							"protocol": "http",
+							"host": [
+								"{{tenant1_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"items",
+								"1",
+								""
+							]
+						},
+						"description": "Delete an item from Tenant 1"
+					},
+					"response": []
+				}
+			],
+			"description": "CRUD operations for Items in Tenant 1 (School 1)"
+		},
+		{
+			"name": "Tenant 2 - Items API",
+			"item": [
+				{
+					"name": "List Items",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an object with results array', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('results');",
+									"    pm.expect(jsonData.results).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant2_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{tenant2_domain}}:8000/api/items/",
+							"protocol": "http",
+							"host": [
+								"{{tenant2_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"items",
+								""
+							]
+						},
+						"description": "Get all items for Tenant 2 (automatically tenant-isolated)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Item created successfully', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"    pm.expect(jsonData).to.have.property('description');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant2_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Item\",\n    \"description\": \"This is a test item for Tenant 2\"\n}"
+						},
+						"url": {
+							"raw": "http://{{tenant2_domain}}:8000/api/items/",
+							"protocol": "http",
+							"host": [
+								"{{tenant2_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"items",
+								""
+							]
+						},
+						"description": "Create a new item in Tenant 2's schema"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Item",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant2_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{tenant2_domain}}:8000/api/items/1/",
+							"protocol": "http",
+							"host": [
+								"{{tenant2_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"items",
+								"1",
+								""
+							]
+						},
+						"description": "Get a specific item by ID from Tenant 2"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Item (PUT)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant2_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Item\",\n    \"description\": \"This item has been updated\"\n}"
+						},
+						"url": {
+							"raw": "http://{{tenant2_domain}}:8000/api/items/1/",
+							"protocol": "http",
+							"host": [
+								"{{tenant2_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"items",
+								"1",
+								""
+							]
+						},
+						"description": "Update an entire item (replace all fields)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Item (PATCH)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant2_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Only updating the description\"\n}"
+						},
+						"url": {
+							"raw": "http://{{tenant2_domain}}:8000/api/items/1/",
+							"protocol": "http",
+							"host": [
+								"{{tenant2_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"items",
+								"1",
+								""
+							]
+						},
+						"description": "Partially update an item (update specific fields only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Item",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant2_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{tenant2_domain}}:8000/api/items/1/",
+							"protocol": "http",
+							"host": [
+								"{{tenant2_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"items",
+								"1",
+								""
+							]
+						},
+						"description": "Delete an item from Tenant 2"
+					},
+					"response": []
+				}
+			],
+			"description": "CRUD operations for Items in Tenant 2 (School 2)"
+		},
+		{
+			"name": "User Profile",
+			"item": [
+				{
+					"name": "Tenant 1 - Get Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Profile includes tenant context', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('username');",
+									"    pm.expect(jsonData).to.have.property('email');",
+									"    pm.expect(jsonData).to.have.property('tenant_schema');",
+									"    pm.expect(jsonData.tenant_schema).to.equal('school1');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant1_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{tenant1_domain}}:8000/api/profile/",
+							"protocol": "http",
+							"host": [
+								"{{tenant1_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"profile",
+								""
+							]
+						},
+						"description": "Get current user profile with tenant context for Tenant 1"
+					},
+					"response": []
+				},
+				{
+					"name": "Tenant 2 - Get Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Profile includes tenant context', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('username');",
+									"    pm.expect(jsonData).to.have.property('email');",
+									"    pm.expect(jsonData).to.have.property('tenant_schema');",
+									"    pm.expect(jsonData.tenant_schema).to.equal('school2');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant2_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{tenant2_domain}}:8000/api/profile/",
+							"protocol": "http",
+							"host": [
+								"{{tenant2_domain}}"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"profile",
+								""
+							]
+						},
+						"description": "Get current user profile with tenant context for Tenant 2"
+					},
+					"response": []
+				}
+			],
+			"description": "User profile endpoints showing tenant-specific user information"
+		}
+	]
+}
