@@ -19,6 +19,11 @@ django-cors-headers==4.4.0
 gunicorn==23.0.0
 whitenoise==6.11.0  # Serve static files efficiently
 
+# Development tools
+watchdog==6.0.0  # File system event monitoring for auto-reload
+django-extensions==4.1  # Useful development utilities (shell_plus, etc.)
+Werkzeug==3.1.3  # Required for runserver_plus (enhanced dev server)
+
 # Testing
 pytest==8.3.3
 pytest-django==4.9.0

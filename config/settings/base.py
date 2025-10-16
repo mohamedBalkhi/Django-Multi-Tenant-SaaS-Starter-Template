@@ -23,6 +23,10 @@ TENANT_DOMAIN_MODEL = "tenants.Domain"
 PUBLIC_SCHEMA_NAME = 'public'
 PUBLIC_SCHEMA_URLCONF = 'config.urls_public'
 
+# Automatically serve public schema for unmapped domains (localhost, new domains, etc.)
+# This ensures admin panel and public URLs are always accessible without manual domain setup
+SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
+
 # Shared apps - available across all tenants in the public schema
 SHARED_APPS = (
     'django_tenants',  # Must be first

@@ -37,7 +37,10 @@ A production-ready Django starter template for building multi-tenant SaaS applic
 - ✅ **Tenant-Aware JWT Authentication** - Secure authentication with cross-tenant protection
 - ✅ **Admin-Side Tenant Provisioning** - Easy tenant creation via CLI, Admin UI, or API
 - ✅ **Automatic Schema Management** - Schemas and migrations created automatically
-- ✅ **Docker & Docker Compose** - Production-ready containerization
+- ✅ **Hot-Reload Development** - Instant file change detection with Watchdog (no container restarts!)
+- ✅ **Docker & Docker Compose** - Production-ready containerization with dev-optimized workflow
+- ✅ **Makefile Commands** - Simple `make` commands for common tasks
+- ✅ **Enhanced Dev Tools** - django-extensions with shell_plus, runserver_plus, and more
 - ✅ **REST API with DRF** - Example endpoints demonstrating tenant isolation
 - ✅ **Comprehensive Test Suite** - pytest tests with tenant isolation coverage
 - ✅ **Easy to Extend** - Clean architecture, well-documented code
@@ -66,6 +69,11 @@ Each tenant gets:
 - **Subdomain routing** (e.g., `tenant1.localhost:8000`)
 - **Tenant-specific JWT tokens** (cross-tenant protection)
 
+**Smart Domain Handling:**
+- Unmapped domains (like `localhost`) automatically fall back to the public schema
+- No manual setup required for admin panel access
+- Fresh installations work immediately without domain configuration
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -74,7 +82,9 @@ Each tenant gets:
 - PostgreSQL 14+ (or use Docker)
 - Docker & Docker Compose (optional, recommended)
 
-### Option 1: Docker (Recommended)
+### Option 1: Docker (Recommended) ⚡
+
+**With auto-reload enabled - changes to your code are instantly reflected!**
 
 ```bash
 # 1. Clone and navigate to directory
@@ -83,8 +93,11 @@ cd DjangoMultiTenancy
 # 2. Copy environment file (already exists, but check settings)
 cp .env.example .env  # Optional: modify if needed
 
-# 3. Start services (builds images, runs migrations, starts server)
-docker-compose up --build -d
+# 3. Start services with auto-reload (using Makefile - recommended)
+make docker-up
+
+# Or manually:
+docker-compose up --build
 
 # 4. Create demo tenants (includes test users)
 docker-compose exec web python manage.py setup_demo
@@ -93,7 +106,13 @@ docker-compose exec web python manage.py setup_demo
 docker-compose exec -it web python manage.py createsuperuser
 ```
 
-**That's it! 🎉 Your multi-tenant app is running!**
+**That's it! 🎉 Your multi-tenant app is running with hot-reload!**
+
+**🔥 Development Features:**
+- ✅ **Auto-reload** - File changes instantly reload the server (powered by Watchdog)
+- ✅ **Enhanced shell** - Use `make docker-shell` for shell_plus with auto-imports
+- ✅ **Live logs** - Use `make docker-logs` to follow server logs in real-time
+- ✅ **Volume mounts** - Code changes sync immediately without rebuilds
 
 > **📝 Note**: Migration files are **already included** in the repository. The `docker-compose up` command automatically applies them to create the database schema. You only need to create new migrations if you add/modify models later (see "Adding New Code/Migrations" section below).
 
@@ -243,6 +262,50 @@ connection.set_schema_to_public()  # Switch back
 
 **Tip:** Use the management command (Method 1) for consistent tenant provisioning with built-in validation and user creation.
 
+## ⚡ Development Workflow
+
+### Using Makefile Commands (Recommended)
+
+The template includes a comprehensive Makefile with helpful development commands:
+
+```bash
+# View all available commands
+make help
+
+# Docker development (with auto-reload)
+make docker-up          # Start containers with hot-reload
+make docker-down        # Stop containers
+make docker-logs        # Follow logs in real-time
+make docker-rebuild     # Rebuild from scratch
+make docker-shell       # Open enhanced Django shell in container
+
+# Local development
+make run                # Run development server with auto-reload
+make shell              # Open Django shell
+make shell-plus         # Open enhanced shell with auto-imports
+make migrate            # Run migrations for all tenants
+
+# Testing
+make test               # Run test suite
+make test-cov           # Run tests with coverage report
+
+# Database management
+make demo               # Create demo tenants
+make superuser          # Create superuser for admin
+
+# Maintenance
+make clean              # Clean Python cache files
+```
+
+### Hot-Reload Development Experience
+
+**Docker:** The development server uses `runserver_plus` with Watchdog for instant file change detection:
+- Edit Python files → Server reloads automatically
+- Edit templates → Changes reflect immediately
+- No need to restart containers
+
+**Local:** Same hot-reload experience with `make run`
+
 ## 📝 Adding New Code/Migrations
 
 When you add new models or make changes:
@@ -253,6 +316,9 @@ python manage.py makemigrations
 
 # Apply to ALL tenants automatically
 python manage.py migrate_schemas
+
+# Or using Makefile
+make migrate
 ```
 
 This updates:
@@ -618,6 +684,19 @@ This project is open source and available under the MIT License.
 10. **Business logic** - The template provides multi-tenancy infrastructure; you add roles, permissions, and business-specific features
 
 ## 🆘 Troubleshooting
+
+### "No tenant for hostname" error
+**This should NOT happen** - the template automatically falls back to the public schema for unmapped domains.
+
+If you see this error:
+1. Check that `SHOW_PUBLIC_IF_NO_TENANT_FOUND = True` is set in `config/settings/base.py`
+2. This setting ensures `localhost` and any new domain automatically serves the admin panel
+3. You don't need to manually create domain mappings for localhost or admin access
+
+**How it works:**
+- When you access an unmapped domain (like `localhost` or a new domain), the system automatically uses the public schema
+- This means `/admin` and public URLs work immediately without setup
+- Only tenant-specific subdomains need explicit domain mappings
 
 ### "relation does not exist" error
 Run migrations: `python manage.py migrate_schemas`

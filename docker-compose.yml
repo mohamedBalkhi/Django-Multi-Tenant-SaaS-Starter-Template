@@ -37,13 +37,20 @@ services:
   # Django web application
   web:
     build: .
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --reload --workers 2
+    # Use Django's development server with watchdog for instant auto-reload
+    command: python manage.py runserver_plus 0.0.0.0:8000 --nostatic
     volumes:
       - .:/app
+      # Exclude Python cache from sync to improve performance
+      - /app/__pycache__
+      - /app/**/__pycache__
     ports:
       - "8000:8000"
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.development
+      - PYTHONUNBUFFERED=1
+      # Enable Watchdog for better file change detection
+      - WERKZEUG_DEBUG_PIN=off
     env_file:
       - .env
     depends_on:
@@ -54,6 +61,9 @@ services:
     networks:
       - multitenant-network
     restart: unless-stopped
+    # Show logs in real-time
+    stdin_open: true
+    tty: true
 
 volumes:
   postgres_data:

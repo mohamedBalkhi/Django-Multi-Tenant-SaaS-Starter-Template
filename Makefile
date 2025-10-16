@@ -1,19 +1,33 @@
-.PHONY: help setup migrate run test clean docker-up docker-down demo
+.PHONY: help setup migrate run test clean docker-up docker-down docker-logs docker-rebuild demo shell shell-plus
 
 help:
 	@echo "Django Multi-Tenant SaaS - Available Commands"
 	@echo "=============================================="
-	@echo "make setup        - Initial project setup"
-	@echo "make migrate      - Run database migrations for all tenants"
-	@echo "make run          - Run development server"
-	@echo "make test         - Run test suite"
-	@echo "make test-cov     - Run tests with coverage report"
-	@echo "make clean        - Clean Python cache files"
-	@echo "make docker-up    - Start Docker containers"
-	@echo "make docker-down  - Stop Docker containers"
-	@echo "make demo         - Create demo tenants"
-	@echo "make shell        - Open Django shell"
-	@echo "make superuser    - Create superuser for admin"
+	@echo ""
+	@echo "🚀 Development (Docker):"
+	@echo "  make docker-up       - Start Docker containers (with auto-reload)"
+	@echo "  make docker-down     - Stop Docker containers"
+	@echo "  make docker-logs     - View logs (follow mode)"
+	@echo "  make docker-rebuild  - Rebuild and restart containers"
+	@echo "  make docker-shell    - Access Django shell in container"
+	@echo ""
+	@echo "🛠️  Local Development:"
+	@echo "  make setup           - Initial project setup"
+	@echo "  make migrate         - Run database migrations for all tenants"
+	@echo "  make run             - Run development server (with watchdog)"
+	@echo "  make shell           - Open Django shell"
+	@echo "  make shell-plus      - Open enhanced Django shell (shell_plus)"
+	@echo ""
+	@echo "🧪 Testing:"
+	@echo "  make test            - Run test suite"
+	@echo "  make test-cov        - Run tests with coverage report"
+	@echo ""
+	@echo "🗄️  Database:"
+	@echo "  make demo            - Create demo tenants"
+	@echo "  make superuser       - Create superuser for admin"
+	@echo ""
+	@echo "🧹 Maintenance:"
+	@echo "  make clean           - Clean Python cache files"
 
 setup:
 	@echo "Setting up project..."
@@ -27,8 +41,8 @@ migrate:
 	. venv/bin/activate && python manage.py migrate_schemas
 
 run:
-	@echo "Starting development server..."
-	. venv/bin/activate && python manage.py runserver
+	@echo "Starting development server with auto-reload..."
+	. venv/bin/activate && python manage.py runserver_plus
 
 test:
 	@echo "Running tests..."
@@ -48,12 +62,27 @@ clean:
 	@echo "✅ Cleaned!"
 
 docker-up:
-	@echo "Starting Docker containers..."
+	@echo "🚀 Starting Docker containers with auto-reload..."
+	@echo "📝 Files will auto-reload when you save changes!"
 	docker-compose up --build
 
 docker-down:
 	@echo "Stopping Docker containers..."
 	docker-compose down
+
+docker-logs:
+	@echo "Following Docker logs (Ctrl+C to exit)..."
+	docker-compose logs -f web
+
+docker-rebuild:
+	@echo "Rebuilding Docker containers..."
+	docker-compose down
+	docker-compose build --no-cache
+	docker-compose up
+
+docker-shell:
+	@echo "Opening Django shell in Docker container..."
+	docker-compose exec web python manage.py shell_plus
 
 demo:
 	@echo "Creating demo tenants..."
@@ -62,6 +91,10 @@ demo:
 shell:
 	@echo "Opening Django shell..."
 	. venv/bin/activate && python manage.py shell
+
+shell-plus:
+	@echo "Opening enhanced Django shell with auto-imports..."
+	. venv/bin/activate && python manage.py shell_plus
 
 superuser:
 	@echo "Creating superuser for admin panel..."
